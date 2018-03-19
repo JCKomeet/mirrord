@@ -1,0 +1,62 @@
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <title>MagicBoard</title>
+
+    <style>
+    body,html{
+        width:100%;
+        height:100%;
+        background:black;
+        margin : 0; padding: 0;
+    }
+
+
+      #main {
+        width: 100vw; 
+        max-height: 100vh;
+        margin: auto;
+        position: absolute;
+        top:0;bottom:0; 
+        left:0;right:0; 
+      }
+      #full_canvas {
+          width:100%;
+          height:100%;
+          background:black;
+      }
+    </style>
+    </head>
+    
+    <body>
+
+            <div id="main">
+                <img id="full_canvas">
+                    
+                </img>
+                <table id="sections" > 
+
+                </table>
+            </div>
+
+        
+    </body>
+    <script> 
+
+    var main = document.querySelector("#main");
+    main.style.height = {{height}}/{{width}} * 100 + "vw";
+    main.style.maxWidth = {{width}}/{{height}} * 100 + "vh";
+
+    var canvas_el = document.querySelector("#full_canvas");
+    canvas_el.src="./board.png?" + Date.now();
+
+    function reload(){
+        canvas_el.src="./board.png?" + Date.now();
+        canvas_el.onload = function(){
+		console.log('ok')
+        }
+    }
+    window.setInterval(reload,1000);
+
+    </script>
+    </html>

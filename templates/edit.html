@@ -1,0 +1,339 @@
+<html>
+		<head>
+		<meta name="viewport" content="width=device-width,user-scalable=no">
+		<title>MagicBoard</title>
+
+		<style>
+		
+		#sketchpad {
+			width: 100vw; 
+			max-height: 100vh;
+			margin: auto;
+            
+			background:black;
+		}
+		body,html {
+			padding:0;
+			margin:0;
+			width:100%;
+			height:100%;
+		}
+		body { 
+            display:flex;
+			flex-wrap: wrap;
+		}
+        #button {
+            height:2em;
+        }
+        .button {
+
+            box-shadow:inset 0px 39px 0px -24px #3dc21b;
+            background-color:#44c767;
+            -moz-border-radius:4px;
+            -webkit-border-radius:4px;
+            border-radius:4px;
+            border:1px solid #18ab29;
+            display:inline-block;
+            cursor:pointer;
+            color:#ffffff;
+            font-family:Arial;
+            font-size:15px;
+            padding:6px 15px;
+            text-decoration:none;
+            text-shadow:0px 1px 0px #2f6627;
+        }
+        .button:hover {
+            background:#43A047;
+            
+        }
+        #controls {
+            flex:1;
+            display:flex;
+            justify-content: space-around;
+            align-content: space-around;
+            flex-flow:column;
+            align-items: center;
+        }
+		</style>
+		</head>
+		
+		<body >
+			<div >
+				<canvas id="sketchpad" height="{{cell_height}}" width="{{cell_width}}">
+				</canvas>
+			</div>
+			<div id="controls"> 
+                    
+                <div class="button" onclick="save()">save</div><div class="button" onclick="whipe_clear()">clear</div> 
+            
+                <input id="myFileInput" type="file" accept="image/png;capture=camera">
+            </div>
+		</body>
+		<script>
+		
+			// Variables for referencing the canvas and 2dcanvas context
+var canvas,ctx;
+
+    // Variables to keep track of the mouse position and left-button status 
+    var mouseX,mouseY,mouseDown=0;
+	var width = {{ cell_width }},height = {{ cell_height }};
+
+    let sketchpad = document.querySelector("#sketchpad");
+
+    sketchpad.style.height = height/width * 100 + "vw";
+    sketchpad.style.maxWidth = width/height * 100 + "vh";
+
+    
+    // Variables to keep track of the touch position
+    var touchX,touchY;
+
+    // Draws a dot at a specific position on the supplied canvas name
+    // Parameters are: A canvas context, the x position, the y position, the size of the dot
+    function drawDot(ctx,x,y,size) {
+        // Let's use black by setting RGB values to 0, and 255 alpha (completely opaque)
+        r=0; g=0; b=0; a=255;
+
+        // Select a fill style
+        ctx.fillStyle = "white";
+
+        // Draw a filled circle
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI*2, true); 
+        ctx.closePath();
+        ctx.fill();
+    } 
+
+    // Clear the canvas context using the canvas width and height
+    function clearCanvas(canvas,ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Keep track of the mouse button being pressed and draw a dot at current location
+    function sketchpad_mouseDown() {
+        mouseDown=1;
+        drawDot(ctx,mouseX,mouseY,12);
+    }
+
+    // Keep track of the mouse button being released
+    function sketchpad_mouseUp() {
+        mouseDown=0;
+    }
+
+    // Keep track of the mouse position and draw a dot if mouse button is currently pressed
+    function sketchpad_mouseMove(e) { 
+        // Update the mouse co-ordinates when moved
+        getMousePos(e);
+
+        // Draw a dot if the mouse button is currently being pressed
+        if (mouseDown==1) {
+            drawDot(ctx,mouseX,mouseY,12);
+        }
+    }
+
+    // Get the current mouse position relative to the top-left of the canvas
+    function getMousePos(e) {
+        if (!e)
+            var e = event;
+
+        if (e.offsetX) {
+            mouseX = width * (  e.offsetX  / canvas.clientWidth);
+			mouseY = height * ( e.offsetY / canvas.clientHeight  );
+
+        }
+        else if (e.layerX) {
+            mouseX = width * (  e.layerX  / canvas.clientWidth);
+			mouseY = height * ( e.layerY / canvas.clientHeight  );
+        }
+     }
+
+    function sketchpad_touchStart(e) {
+        getTouchPos(e);
+
+        drawDot(ctx,touchX,touchY,12);
+        e.preventDefault();
+    }
+
+    function sketchpad_touchMove(e) { 
+        // Update the touch co-ordinates
+        getTouchPos(e);
+        drawDot(ctx,touchX,touchY,12); 
+
+        event.preventDefault();
+    }
+    function getTouchPos(e) {
+        if (!e)
+            var e = event;
+
+        if(e.touches) {
+            if (e.touches.length == 1) { // Only deal with one finger
+                var touch = e.touches[0]; // Get the information for finger #1
+                touchX=  width * (  touch.clientX  / canvas.clientWidth);
+				touchY= height * (  touch.clientY  / canvas.clientHeight);
+				//debugger;
+            }
+        }
+    }
+
+
+        // Get the specific canvas element from the HTML document
+        canvas = document.getElementById('sketchpad');
+
+        // If the browser supports the canvas tag, get the 2d drawing context for this canvas
+        if (canvas.getContext)
+			ctx = canvas.getContext('2d');
+			
+			
+
+        // Check that we have a valid context to draw on/with before adding event handlers
+        if (ctx) {
+            // React to mouse events on the canvas, and mouseup on the entire document
+            canvas.addEventListener('mousedown', sketchpad_mouseDown, false);
+            canvas.addEventListener('mousemove', sketchpad_mouseMove, false);
+            window.addEventListener('mouseup', sketchpad_mouseUp, false);
+
+            // React to touch events on the canvas
+            canvas.addEventListener('touchstart', sketchpad_touchStart, false);
+			canvas.addEventListener('touchmove', sketchpad_touchMove, false);
+			
+			
+
+		}
+		
+function refresh_board() {
+	var drawing = new Image();
+			
+	drawing.onload = function() {
+		ctx.drawImage(drawing,0,0);
+		console.log("Yay");
+	};
+	drawing.src = "./board.png?time="+ Date.now(); 
+};
+refresh_board();
+
+/*
+	  var reader = new FileReader();
+            reader.readAsDataURL(new Blob([xhr.response],{type: "image/png"})); 
+        reader.onloadend = function() {
+            base64data = reader.result;                
+            var image = new Image();
+            image.src = base64data;
+            screen_ctx.drawImage(image, 0, 0);  
+*/
+
+function whipe_clear() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', './clear');
+    xhr.setRequestHeader('Content-Type', 'plain/text');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            alert("Cleared")
+			window.location = window.location.protocol + "//" + window.location.host
+        }else {
+            console.log(xhr);
+            alert("Error");
+        }
+    };
+    xhr.send("clear");
+}
+
+var myInput = document.getElementById('myFileInput');
+
+function sendPic() {
+    var file = myInput.files[0];
+    var reader = new FileReader();
+  
+    reader.onloadend = function() {
+        base64data = reader.result;                
+        var image = new Image();
+        image.src = base64data;
+        image.onload = function() {
+
+            var imgWidth = image.naturalWidth;
+            var screenWidth  = canvas.width;
+            var scaleX = 1;
+            if (imgWidth > screenWidth)
+                scaleX = screenWidth/imgWidth;
+            var imgHeight = image.naturalHeight;
+            var screenHeight = canvas.height;
+            var scaleY = 1;
+            if (imgHeight > screenHeight)
+                scaleY = screenHeight/imgHeight;
+            var scale = scaleY;
+            if(scaleX < scaleY)
+                scale = scaleX;
+            if(scale < 1){
+                imgHeight = imgHeight*scale;
+                imgWidth = imgWidth*scale;          
+            }
+
+            var offset_x = 0;
+            var offset_y = 0;
+
+            if(imgWidth < screenWidth) {
+                offset_x = Math.max(0, width - imgWidth/2 - imgWidth ) ; // hacky shit 
+            } else {
+                offset_y = Math.max(0,height - imgHeight/2 - imgHeight);
+                
+            }
+
+            //alert(`offset_x ${offset_x} \n offset_y ${offset_y} imgWidth ${imgWidth} imgheight ${imgHeight} `)
+        
+            ctx.drawImage(image, 0,0 , image.naturalWidth, image.naturalHeight, offset_x, offset_y, imgWidth, imgHeight);
+        }
+    }
+    reader.readAsDataURL(file);
+}
+
+myInput.addEventListener('change', sendPic, false);
+
+
+function save (){
+    save.enabled = false;
+    var canvasBlob = dataURLToBlob( canvas.toDataURL() );
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', './save');
+    xhr.setRequestHeader('Content-Type', 'image/png');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            alert("Saved")
+			window.location = window.location.protocol + "//" + window.location.host
+        }else {
+            console.log(xhr);
+            alert("Error saving");
+        }
+    };
+    xhr.send(canvasBlob);
+	return "saving";
+}
+
+
+function dataURLToBlob(dataURL) {
+    var BASE64_MARKER = ';base64,';
+
+    if (dataURL.indexOf(BASE64_MARKER) == -1) {
+        var parts = dataURL.split(',');
+        var contentType = parts[0].split(':')[1];
+        var raw = decodeURIComponent(parts[1]);
+
+        return new Blob([raw], {type: contentType});
+    }
+
+    var parts = dataURL.split(BASE64_MARKER);
+    var contentType = parts[0].split(':')[1];
+    var raw = window.atob(parts[1]);
+    var rawLength = raw.length;
+
+    var uInt8Array = new Uint8Array(rawLength);
+
+    for (var i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], {type: contentType});
+}
+
+
+		
+		
+		</script>
+		</html>

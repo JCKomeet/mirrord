@@ -1,0 +1,15 @@
+[package]
+name = "mirrord"
+version = "0.1.1"
+authors = ["Roelof Sol <rs>"]
+
+[dependencies]
+bytes = "*"
+futures = "*"
+log = "*"
+env_logger = "*"
+actix = "*"
+actix-web = "*"
+structopt = "*"
+png = "*"
+tera = "*"

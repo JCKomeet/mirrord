@@ -1,0 +1,91 @@
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <title>MagicBoard</title>
+
+    <style>
+    body,html{
+        width:100%;
+        height:100%;
+        margin : 0; padding: 0;
+    }
+
+
+      #main {
+        width: 100vw; 
+        max-height: 100vh;
+        margin: auto;
+        position: absolute;
+        top:0;bottom:0; 
+        left:0;right:0; 
+      }
+      #full_canvas {
+          width:100%;
+          height:100%;
+          position:absolute;
+          background:black;
+          top:0;bottom:0; 
+          left:0;right:0; 
+          z-index:-1;
+      }
+      table {
+          
+          width:100%;
+          height:100%;
+      }
+      .section{
+        border: 2px solid grey;
+        padding:0; margin:0;
+      }
+      .section:hover{
+        border:1px solid green;
+      }
+      .celllink{
+          width:100%;
+          height:100%;
+          display:block;
+      }
+    </style>
+    </head>
+    
+    <body>
+
+            <div id="main">
+                <img id="full_canvas" src="./board.png?">
+                    
+                </img>
+                <table id="sections" > 
+
+                </table>
+            </div>
+
+        
+    </body>
+    <script> 
+
+    var canvas_el = document.querySelector("#full_canvas");
+    canvas_el.src="./board.png?" + Date.now();
+    
+    
+
+
+    var board_w = {{ width }}, board_h = {{ height}};
+    var h_sections = {{ ncols }} ;
+    var v_sections = {{ nrows }} ;
+
+    var main = document.querySelector("#main");
+    main.style.height = {{height}}/{{width}} * 100 + "vw";
+    main.style.maxWidth = {{width}}/{{height}} * 100 + "vh";
+
+    var table = document.querySelector("#sections");
+    for (var i = 0 ; i < v_sections; i++) {
+        var row = table.insertRow(-1);
+        for (var j = 0; j < h_sections; j++) {
+            var cell = row.insertCell(-1);
+            cell.classList.add("section");
+            cell.innerHTML = "<a class='celllink' href='./"+i+"/"+j+"/edit'></a>"
+        }
+    }
+    
+    </script>
+    </html>
